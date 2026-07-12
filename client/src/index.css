@@ -1,0 +1,168 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #faf9fd;
+  --bg-secondary: #efedf7;
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-glass: rgba(255, 255, 255, 0.6);
+  --text-primary: #17151f;
+  --text-secondary: #64607a;
+  --text-tertiary: #9a95ad;
+
+  /* RecipeRight signature palette — "Blueberry" (bespoke indigo-violet brand,
+     paired with a leaf-green reserved for success/done states) */
+  --accent: #5b4be0;
+  --accent-strong: #4636c4;
+  --accent-soft: #ecebfd;
+  --accent-green: #21a366;
+  --accent-gradient: linear-gradient(135deg, #5b4be0 0%, #8a6bff 100%);
+  --accent-glow: 0 8px 28px rgba(91, 75, 224, 0.32);
+
+  --border: rgba(23, 21, 31, 0.08);
+  --shadow-sm: 0 2px 8px rgba(23, 21, 31, 0.06);
+  --shadow-md: 0 8px 32px rgba(23, 21, 31, 0.1);
+  --shadow-lg: 0 24px 64px rgba(23, 21, 31, 0.14);
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --radius-full: 9999px;
+
+  /* Hyper-fast interaction timing, tuned for this app only */
+  --ease-snap: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'DM Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  #root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Signature snappy feel: buttons, links, and inputs react instantly */
+  button,
+  a,
+  [role='button'],
+  input,
+  textarea,
+  select {
+    transition:
+      color var(--dur-fast) var(--ease-snap),
+      background-color var(--dur-fast) var(--ease-snap),
+      border-color var(--dur-fast) var(--ease-snap),
+      box-shadow var(--dur-base) var(--ease-snap),
+      transform var(--dur-fast) var(--ease-snap);
+  }
+
+  button:active,
+  [role='button']:active {
+    transform: scale(0.97);
+  }
+
+  /* Unique RecipeRight focus ring — blueberry glow, not the default browser outline */
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--accent-soft), 0 0 0 4px var(--accent);
+    border-radius: var(--radius-sm);
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: #fff;
+  }
+}
+
+@layer components {
+  .glass {
+    background: var(--bg-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--bg-secondary) 25%,
+      rgba(0, 0, 0, 0.04) 37%,
+      var(--bg-secondary) 63%
+    );
+    background-size: 1000px 100%;
+  }
+
+  /* Signature blueberry gradient surface (hero banners, headers, primary CTAs) */
+  .accent-gradient {
+    background: var(--accent-gradient);
+  }
+
+  /* Blueberry gradient text for brand accents */
+  .accent-text {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Fast, springy lift used across cards — app-specific micro-interaction */
+  .lift {
+    transition:
+      transform var(--dur-base) var(--ease-snap),
+      box-shadow var(--dur-base) var(--ease-snap);
+    will-change: transform;
+  }
+  .lift:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* Hide scrollbar utility for horizontal pill rows */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
