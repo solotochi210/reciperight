@@ -9,6 +9,17 @@ async function start() {
     await connectDB();
     const server = app.listen(PORT, () => {
       console.log(`[server] RecipeRight API listening on http://localhost:${PORT}`);
+      console.log(`[server] CLIENT_URL=${process.env.CLIENT_URL || '(not set)'}`);
+      console.log(
+        `[server] Google OAuth=${
+          process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_CALLBACK_URL
+            ? 'enabled'
+            : 'DISABLED — set GOOGLE_* env vars'
+        }`
+      );
+      console.log(
+        `[server] SendGrid=${process.env.SENDGRID_API_KEY ? 'enabled' : 'disabled'}`
+      );
     });
 
     const shutdown = (signal) => {

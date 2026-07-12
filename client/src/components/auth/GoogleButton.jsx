@@ -1,8 +1,14 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// Prefer absolute API URL in production (Vercel → Render). Relative "/api" only
+// works with the local Vite proxy.
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
 
 export default function GoogleButton({ label = 'Continue with Google' }) {
   const handleClick = () => {
-    window.location.href = `${API_URL}/auth/google`;
+    // Always hit the API host directly so Google's redirect URI matches Render.
+    const googleUrl = API_URL.startsWith('http')
+      ? `${API_URL}/auth/google`
+      : `https://reciperight.onrender.com/api/auth/google`;
+    window.location.href = googleUrl;
   };
 
   return (

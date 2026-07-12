@@ -19,9 +19,21 @@ if (hasGoogle) {
   router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'], session: false }));
   router.get(
     '/google/callback',
-    passport.authenticate('google', { session: false, failureRedirect: `${process.env.CLIENT_URL || 'http://localhost:5173'}/login?error=google` }),
+    passport.authenticate('google', {
+      session: false,
+      failureRedirect: `${process.env.CLIENT_URL || 'https://reciperight-client.vercel.app'}/login?error=google`,
+    }),
     authController.googleCallback
   );
+} else {
+  // Avoid a silent 404 when env vars are missing on Render.
+  router.get('/google', (_req, res) => {
+    res.status(503).json({
+      success: false,
+      message:
+        'Google sign-in is not configured. Set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_CALLBACK_URL on the server.',
+    });
+  });
 }
 
 module.exports = router;

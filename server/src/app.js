@@ -26,13 +26,43 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Security headers
-app.use(helmet());
+app.use(
+  helmet({
+    // Allow the Vercel frontend to call this API cross-origin
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  })
+);
 
-// CORS — whitelist the client origin, allow credentials for refresh cookie
-const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+// CORS — whitelist client origin(s), allow credentials for refresh cookie.
+// CLIENT_URL must be the live Vercel URL. Extra origins can be comma-separated
+// in CLIENT_URLS. Production frontend is allowlisted so a leftover placeholder
+// CLIENT_URL cannot block signup/login.
+function normalizeOrigin(url = '') {
+  return String(url).trim().replace(/\/$/, '');
+}
+
+const clientUrl = normalizeOrigin(process.env.CLIENT_URL || 'http://localhost:5173');
+const allowedOrigins = new Set(
+  [
+    clientUrl,
+    'http://localhost:5173',
+    'https://reciperight-client.vercel.app',
+    ...(process.env.CLIENT_URLS || '').split(','),
+  ]
+    .map(normalizeOrigin)
+    .filter(Boolean)
+);
+
 app.use(
   cors({
-    origin: clientUrl,
+    origin(origin, callback) {
+      // Non-browser clients (health checks, curl) send no Origin
+      if (!origin) return callback(null, true);
+      const normalized = normalizeOrigin(origin);
+      if (allowedOrigins.has(normalized)) return callback(null, true);
+      console.warn(`[cors] blocked origin: ${origin}`);
+      return callback(null, false);
+    },
     credentials: true,
   })
 );

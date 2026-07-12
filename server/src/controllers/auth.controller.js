@@ -57,7 +57,7 @@ async function googleCallback(req, res) {
   const { accessToken, refreshToken } = authService.googleIssue(req.user);
   res.cookie(REFRESH_COOKIE, refreshToken, refreshCookieOptions());
   // Redirect back to the client with the access token in the URL fragment.
-  const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+  const clientUrl = (process.env.CLIENT_URL || 'https://reciperight-client.vercel.app').replace(/\/$/, '');
   return res.redirect(`${clientUrl}/login#access_token=${accessToken}`);
 }
 
