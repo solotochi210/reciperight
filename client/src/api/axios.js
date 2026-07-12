@@ -1,12 +1,9 @@
-import axios from 'axios';
+import { API_BASE_URL } from '../config';
 import { getAccessToken, setAccessToken, clearAccessToken } from './tokenStore';
 import { emitToast } from '../utils/toastBus';
+import axios from 'axios';
 
-// Local: "/api" (Vite proxy). Production: absolute Render URL from VITE_API_URL.
-const configured = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
-const baseURL =
-  configured ||
-  (import.meta.env.PROD ? 'https://reciperight.onrender.com/api' : '/api');
+const baseURL = API_BASE_URL;
 
 const api = axios.create({
   baseURL,

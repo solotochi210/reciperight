@@ -37,7 +37,9 @@ export default function Register() {
       navigate('/', { replace: true });
     },
     onError: (err) => {
-      error(err.response?.data?.message || 'Registration failed');
+      const data = err.response?.data;
+      const fieldMsg = data?.errors?.[0]?.message;
+      error(fieldMsg || data?.message || 'Registration failed');
     },
   });
 

@@ -2,10 +2,24 @@ const passport = require('passport');
 const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
 const { User } = require('../models');
 
-const hasGoogle =
-  process.env.GOOGLE_CLIENT_ID &&
-  process.env.GOOGLE_CLIENT_SECRET &&
-  process.env.GOOGLE_CALLBACK_URL;
+/**
+ * Prefer an explicit GOOGLE_CALLBACK_URL.
+ * In production, default to the Vercel same-origin proxy path so the OAuth
+ * cookie is first-party on the frontend domain.
+ */
+function resolveGoogleCallbackUrl() {
+  if (process.env.GOOGLE_CALLBACK_URL) {
+    return process.env.GOOGLE_CALLBACK_URL.replace(/\/$/, '');
+  }
+  const client = (process.env.CLIENT_URL || '').replace(/\/$/, '');
+  if (process.env.NODE_ENV === 'production' && client) {
+    return `${client}/api/auth/google/callback`;
+  }
+  return 'http://localhost:5000/api/auth/google/callback';
+}
+
+const googleCallbackUrl = resolveGoogleCallbackUrl();
+const hasGoogle = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
 
 if (hasGoogle) {
   passport.use(
@@ -13,7 +27,7 @@ if (hasGoogle) {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: process.env.GOOGLE_CALLBACK_URL,
+        callbackURL: googleCallbackUrl,
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
@@ -49,6 +63,7 @@ if (hasGoogle) {
       }
     )
   );
+  console.log(`[passport] Google OAuth enabled. callbackURL=${googleCallbackUrl}`);
 } else {
   console.warn('[passport] Google OAuth not configured — /api/auth/google disabled.');
 }
@@ -65,3 +80,4 @@ passport.deserializeUser(async (id, done) => {
 
 module.exports = passport;
 module.exports.hasGoogle = hasGoogle;
+module.exports.googleCallbackUrl = googleCallbackUrl;
