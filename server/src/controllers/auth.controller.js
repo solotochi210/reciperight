@@ -59,8 +59,24 @@ async function googleCallback(req, res) {
   // req.user is set by passport.
   const { accessToken, refreshToken } = authService.googleIssue(req.user);
   res.cookie(REFRESH_COOKIE, refreshToken, refreshCookieOptions());
-  // Redirect back to the client with the access token in the URL fragment.
-  const clientUrl = (process.env.CLIENT_URL || 'https://reciperight-client.vercel.app').replace(/\/$/, '');
+  // Always land on the live frontend (ignore placeholder / Render CLIENT_URL).
+  let clientUrl = (process.env.CLIENT_URL || '').replace(/\/$/, '');
+  if (
+    !clientUrl ||
+    clientUrl.includes('placeholder') ||
+    clientUrl.includes('onrender.com') ||
+    process.env.NODE_ENV === 'production'
+  ) {
+    // In production prefer the known Vercel app unless CLIENT_URL is a real frontend.
+    if (
+      process.env.NODE_ENV === 'production' &&
+      (!clientUrl || clientUrl.includes('placeholder') || clientUrl.includes('onrender.com'))
+    ) {
+      clientUrl = 'https://reciperight-client.vercel.app';
+    } else if (!clientUrl) {
+      clientUrl = 'http://localhost:5173';
+    }
+  }
   return res.redirect(`${clientUrl}/login#access_token=${accessToken}`);
 }
 

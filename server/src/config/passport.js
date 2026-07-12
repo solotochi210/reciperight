@@ -2,18 +2,38 @@ const passport = require('passport');
 const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
 const { User } = require('../models');
 
+const PRODUCTION_CLIENT = 'https://reciperight-client.vercel.app';
+
 /**
- * Prefer an explicit GOOGLE_CALLBACK_URL.
- * In production, default to the Vercel same-origin proxy path so the OAuth
- * cookie is first-party on the frontend domain.
+ * Google requires an exact redirect_uri match.
+ *
+ * Production ALWAYS uses the Vercel same-origin callback so:
+ * 1) it matches the URI registered in Google Cloud Console
+ * 2) the refresh cookie is set on the frontend domain (via Vercel /api proxy)
+ *
+ * Do NOT use https://reciperight.onrender.com/... as the callback in production —
+ * that causes redirect_uri_mismatch when Console only has the Vercel URI, and
+ * sets cookies on the wrong domain.
  */
 function resolveGoogleCallbackUrl() {
+  const isProd = process.env.NODE_ENV === 'production';
+  const client = (process.env.CLIENT_URL || '').replace(/\/$/, '');
+
+  if (isProd) {
+    // Prefer live CLIENT_URL when it is a real frontend (not placeholder / Render).
+    const safeClient =
+      client &&
+      !client.includes('placeholder') &&
+      !client.includes('onrender.com') &&
+      client.startsWith('http')
+        ? client
+        : PRODUCTION_CLIENT;
+    return `${safeClient}/api/auth/google/callback`;
+  }
+
+  // Local / explicit override for development
   if (process.env.GOOGLE_CALLBACK_URL) {
     return process.env.GOOGLE_CALLBACK_URL.replace(/\/$/, '');
-  }
-  const client = (process.env.CLIENT_URL || '').replace(/\/$/, '');
-  if (process.env.NODE_ENV === 'production' && client) {
-    return `${client}/api/auth/google/callback`;
   }
   return 'http://localhost:5000/api/auth/google/callback';
 }

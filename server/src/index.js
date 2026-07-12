@@ -12,9 +12,9 @@ async function start() {
       console.log(`[server] CLIENT_URL=${process.env.CLIENT_URL || '(not set)'}`);
       console.log(
         `[server] Google OAuth=${
-          process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_CALLBACK_URL
+          process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
             ? 'enabled'
-            : 'DISABLED — set GOOGLE_* env vars'
+            : 'DISABLED — set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET'
         }`
       );
       console.log(
